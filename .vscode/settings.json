@@ -2,7 +2,8 @@
     "rust-analyzer.check.allTargets": false,
     "rust-analyzer.check.extraArgs": [
         "--target",
-        "x86_64-unknown-nut.json"
+        "i386-code16-stage0.json",
+        "-Zbuild-std=core"
     ],
-    "rust-analyzer.cargo.target": "x86_64-unknown-nut.json"
+    "rust-analyzer.cargo.target": "i386-code16-stage0.json"
 }
