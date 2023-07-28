@@ -7,6 +7,8 @@ This is an attempt to boot and bring up a basic kernel in Rust. This is more tha
 
 # Running
 * Install QEmu - https://www.minitool.com/partition-disk/qemu-for-windows.html
+* Run `cargo build`. This will perform the following;
+** Build bootloader\bios\stage0 - Stage 0 boot-sector
 
 # Notes
 Current main binary is the first stage of the boot loader, and needs to fit in 512 byte boot sector
