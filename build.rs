@@ -15,6 +15,7 @@ async fn bios_main() {
         "cargo:rustc-env=BIOS_BOOT_STAGE0_PATH={}",
         bios_boot_stage0_path.display()
     );
+    println!("cargo:warning=Stage0: {}", bios_boot_stage0_path.display());
 }
 
 async fn build_bios_boot_stage0(out_dir: &Path) -> PathBuf {

@@ -1,9 +1,1 @@
-{
-    "rust-analyzer.check.allTargets": false,
-    "rust-analyzer.check.extraArgs": [
-        "--target",
-        "i386-code16-stage0.json",
-        "-Zbuild-std=core"
-    ],
-    "rust-analyzer.cargo.target": "i386-code16-stage0.json"
-}
+{}
