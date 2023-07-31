@@ -42,9 +42,8 @@ check_int13h_extensions:
 rust:
     # push arguments
     push dx     # disk number
-    ##call first_stage
-    call fail
-
+    call stage0
+    
 spin:
     hlt
     jmp spin
