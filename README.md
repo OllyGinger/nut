@@ -17,7 +17,12 @@ Current main binary is the first stage of the boot loader, and needs to fit in 5
 * Then to run in qemu: `qemu-system-x86_64 -drive format=raw,file=target\disk_image.bin`
 
 ## Useful links
+### General
 * https://wiki.osdev.org/Expanded_Main_Page
 * https://os.phil-opp.com
+
+## Bootloader
 * https://github.com/rust-osdev/bootloader/tree/main
+* https://neosmart.net/wiki/mbr-boot-process/
+* http://www.brokenthorn.com/Resources/OSDevIndex.html
 

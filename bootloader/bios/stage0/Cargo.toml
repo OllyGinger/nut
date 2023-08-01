@@ -7,10 +7,5 @@ edition = "2021"
 
 [dependencies]
 
-[profile.dev]
-panic = "abort"
-lto = false
-
-[profile.release]
-panic = "abort"
-lto = false
+[build]
+target = "i386-code16-stage0.json"

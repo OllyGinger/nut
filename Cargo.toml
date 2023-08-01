@@ -19,7 +19,23 @@ lto = false
 panic = "abort"
 lto = false
 
+[profile.stage0]
+inherits = "release"
+opt-level = "s"
+codegen-units = 1
+debug = false
+lto = true
+overflow-checks = true
+
+[profile.stage1]
+inherits = "release"
+opt-level = "s"
+codegen-units = 1
+debug = false
+overflow-checks = true
+
 [build-dependencies]
 async-process = "1.6.0"
 futures = "0.3.25"
 futures-concurrency = "7.0.0"
+mbrman = "0.5.2"
