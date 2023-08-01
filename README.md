@@ -7,14 +7,11 @@ This is an attempt to boot and bring up a basic kernel in Rust. This is more tha
 
 ## Running
 * Install QEmu - https://www.minitool.com/partition-disk/qemu-for-windows.html
-* Run `cargo build`. This will perform the following;
-** Build bootloader\bios\stage0 - Stage 0 boot-sector
-
-## Notes
-Current main binary is the first stage of the boot loader, and needs to fit in 512 byte boot sector
-* Build using cargo: `cargo build --release -Zbuild-std=core --target .\i386-code16-boot-sector.json -Zbuild-std-features=compiler-builtins-mem`
-* Then run: `"C:\Program Files\LLVM\bin\llvm-objcopy.exe" -I elf32-i386 -O binary target\i386-code16-boot-sector\release\nut target\disk_image.bin`
-* Then to run in qemu: `qemu-system-x86_64 -drive format=raw,file=target\disk_image.bin`
+* Run `cargo run`. This will perform the following;
+** Build bootloader\bios\stage0 - MBR loader
+** Build bootloader\bios\stage1 - Second stage loader
+** Package into a raw MBR image
+** Launch QEmu
 
 ## Useful links
 ### General
