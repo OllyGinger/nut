@@ -4,11 +4,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+mbrman = "0.5.2"
+tempfile = "3.3.0"
+fatfs = { version = "0.3.4", default-features = false, features = [
+    "std",
+    "alloc",
+] }
 
 [workspace]
 members = [
     "bootloader/bios/stage0",
-    "bootloader/bios/stage1"
+    "bootloader/bios/stage1",
+    "bootloader/bios/stage2"
 ]
 
 [profile.dev]
@@ -34,8 +41,15 @@ codegen-units = 1
 debug = false
 overflow-checks = true
 
+[profile.stage2]
+inherits = "release"
+debug = true
+overflow-checks = true
+
 [build-dependencies]
 async-process = "1.6.0"
 futures = "0.3.25"
 futures-concurrency = "7.0.0"
-mbrman = "0.5.2"
+
+[build]
+target = "x86_64-pc-windows-msvc"

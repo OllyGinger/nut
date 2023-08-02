@@ -1,5 +1,5 @@
 [package]
-name = "bootloader-x86_64-bios-stage1"
+name = "bootloader-x86_64-bios-stage2"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 
 [build]
-target = "i386-code16-stage0.json"
+target = "i386-unknown-none.json"
