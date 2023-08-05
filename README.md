@@ -25,6 +25,9 @@ The bootloader is mutli-stage. The stages are;
 | Stage 3 | Long Mode (64 bit) | This is the final stage, and it's main task is to load any configuration file we might have to set up the Kernel, and to actually jump into the Kernel.
 
 ## Useful links
+### Reference
+* [AMD x64 Reference](https://www.amd.com/system/files/TechDocs/24593.pdf)
+* 
 ### General
 * https://wiki.osdev.org/Expanded_Main_Page
 * https://os.phil-opp.com

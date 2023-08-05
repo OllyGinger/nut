@@ -13,10 +13,17 @@ fatfs = { version = "0.3.4", default-features = false, features = [
 
 [workspace]
 members = [
+    "x86_64",
     "bootloader/bios/stage0",
     "bootloader/bios/stage1",
     "bootloader/bios/stage2"
 ]
+
+[workspace.package]
+version = "0.1.0"
+
+[workspace.dependencies]
+x86_64 = {version = "0.1.0", path = "x86_64" }
 
 [profile.dev]
 panic = "abort"

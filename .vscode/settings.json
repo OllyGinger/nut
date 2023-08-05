@@ -1,1 +1,5 @@
-{}
+{
+    "rust-analyzer.linkedProjects": [
+        ".\\x86_64\\Cargo.toml"
+    ]
+}
