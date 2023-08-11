@@ -1,115 +1,5 @@
 use bitflags::bitflags;
 
-use crate::{
-    address::VirtAddr, instructions::tables::lgdt, privilege_level::PrivilegeLevel,
-    registers::segmentation::SegmentSelector,
-};
-
-#[derive(Clone, Debug)]
-pub enum Descriptor {
-    UserSegment(u64),
-    SystemSegment(u64, u64),
-}
-
-impl Descriptor {
-    #[inline]
-    pub const fn kernel_code_segment() -> Descriptor {
-        Descriptor::UserSegment(DescriptorFlags::KERNEL_CODE64.bits())
-    }
-    #[inline]
-    pub const fn kernel_data_segment() -> Descriptor {
-        Descriptor::UserSegment(DescriptorFlags::KERNEL_DATA.bits())
-    }
-    #[inline]
-    pub const fn user_code_segment() -> Descriptor {
-        Descriptor::UserSegment(DescriptorFlags::USER_CODE64.bits())
-    }
-    #[inline]
-    pub const fn user_data_segment() -> Descriptor {
-        Descriptor::UserSegment(DescriptorFlags::USER_DATA.bits())
-    }
-}
-#[derive(Copy, Clone, Debug)]
-pub struct DescriptorTablePointer {
-    pub limit: u16,
-    pub base: VirtAddr,
-}
-
-#[derive(Clone, Debug)]
-pub struct GlobalDescriptorTable {
-    table: [u64; 8],
-    len: usize,
-}
-
-impl GlobalDescriptorTable {
-    #[inline]
-    pub const fn new() -> GlobalDescriptorTable {
-        GlobalDescriptorTable {
-            table: [0; 8],
-            len: 1,
-        }
-    }
-
-    pub fn add_entry(&mut self, entry: Descriptor) -> SegmentSelector {
-        let index = match entry {
-            Descriptor::UserSegment(value) => {
-                if self.len > self.table.len().saturating_sub(1) {
-                    panic!("GDT Full");
-                }
-                self.push(value)
-            }
-            Descriptor::SystemSegment(value_low, value_high) => {
-                if self.len > self.table.len().saturating_sub(2) {
-                    panic!("GDT Full - SystemSegment requires two slots");
-                }
-                let idx = self.push(value_low);
-                self.push(value_high);
-                idx
-            }
-        };
-
-        let requested_privilege_level = match entry {
-            Descriptor::UserSegment(value) => {
-                if DescriptorFlags::from_bits_truncate(value)
-                    .contains(DescriptorFlags::DESCRIPTOR_PRIVILEGE_LEVEL)
-                {
-                    PrivilegeLevel::Ring3
-                } else {
-                    PrivilegeLevel::Ring0
-                }
-            }
-            Descriptor::SystemSegment(_, _) => PrivilegeLevel::Ring0,
-        };
-
-        SegmentSelector::new(index as u16, requested_privilege_level)
-    }
-
-    fn push(&mut self, value: u64) -> usize {
-        let idx = self.len;
-        self.table[idx] = value;
-        self.len += 1;
-        idx
-    }
-
-    pub fn load(&'static self) {
-        unsafe { self.load_unsafe() };
-    }
-
-    pub unsafe fn load_unsafe(&self) {
-        unsafe {
-            lgdt(&self.pointer());
-        }
-    }
-
-    fn pointer(&self) -> DescriptorTablePointer {
-        use core::mem::size_of;
-        DescriptorTablePointer {
-            base: VirtAddr::new(self.table.as_ptr() as u64),
-            limit: (self.len * size_of::<u64>() - 1) as u16,
-        }
-    }
-}
-
 bitflags! {
     pub struct DescriptorFlags : u64{
         // Bits `0..=23` of the base address field (not used in 64-bit except FS and GS)
@@ -171,7 +61,7 @@ impl DescriptorFlags {
         Self::USER_SEGMENT.bits()
             | Self::PRESENT.bits()
             | Self::WRITABLE.bits()
-            | Self::ACCESSED.bits()
+            | Self::DEFAULT_OP_SIZE.bits()
             | Self::SEGMENT_LIMIT_0_15.bits()
             | Self::SEGMENT_LIMIT_16_19.bits()
             | Self::GRANULARITY.bits(),
@@ -179,31 +69,9 @@ impl DescriptorFlags {
 
     // Kernel data segment
     #[allow(unused)]
-    pub const KERNEL_DATA: Self =
-        Self::from_bits_truncate(Self::COMMON_FLAGS.bits() | Self::DEFAULT_OP_SIZE.bits());
+    pub const KERNEL_DATA: Self = Self::from_bits_truncate(Self::COMMON_FLAGS.bits());
     // 32-bit kernel code segment
     #[allow(unused)]
-    pub const KERNEL_CODE32: Self = Self::from_bits_truncate(
-        Self::COMMON_FLAGS.bits() | Self::DEFAULT_OP_SIZE.bits() | Self::EXECUTABLE.bits(),
-    );
-    // 64-bit kernel code segment
-    #[allow(unused)]
-    pub const KERNEL_CODE64: Self =
-        Self::from_bits_truncate(Self::KERNEL_CODE32.bits() | Self::LONG_MODE.bits());
-
-    // Usermode data
-    #[allow(unused)]
-    pub const USER_DATA: Self = Self::from_bits_truncate(
-        Self::KERNEL_DATA.bits() | Self::DESCRIPTOR_PRIVILEGE_LEVEL.bits(),
-    );
-    // 32-bit user code segment
-    #[allow(unused)]
-    pub const USER_CODE32: Self = Self::from_bits_truncate(
-        Self::KERNEL_CODE32.bits() | Self::DESCRIPTOR_PRIVILEGE_LEVEL.bits(),
-    );
-    // 64-bit user code segment
-    #[allow(unused)]
-    pub const USER_CODE64: Self = Self::from_bits_truncate(
-        Self::KERNEL_CODE64.bits() | Self::DESCRIPTOR_PRIVILEGE_LEVEL.bits(),
-    );
+    pub const KERNEL_CODE32: Self =
+        Self::from_bits_truncate(Self::COMMON_FLAGS.bits() | Self::EXECUTABLE.bits());
 }

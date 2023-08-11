@@ -30,10 +30,29 @@ pub fn main() {
     );
 
     // Start QEmu
-    println!("Starting QEmu. Image: {}", image_path.display());
-    Command::new("qemu-system-x86_64")
-        .arg("-drive")
-        .arg(format!("format=raw,file={}", image_path.display()))
+    //println!("Starting QEmu. Image: {}", image_path.display());
+    // Delete the old log file
+    //let _ = std::fs::remove_file("qemu.log");
+    //Command::new("qemu-system-x86_64")
+    //    .arg("-d")
+    //    .arg("int,cpu_reset")
+    //    .arg("-D")
+    //    .arg("qemu.log")
+    //    //.arg("-s") // Start GDBServer
+    //    //.arg("-S") // Halt CPU on startup (to connect debugger)
+    //    .arg("-drive")
+    //    .arg(format!("format=raw,file={}", image_path.display()))
+    //    .output()
+    //    .expect("Failed to start qemu-system-x86_64. Is it installed in the PATH?");
+
+    // Start Bochs
+    println!("Starting Bochs. Image: {}", image_path.display());
+    // Delete the old log file
+    let _ = std::fs::remove_file("bochs.log");
+    Command::new("bochs")
+        .arg("-q")
+        .arg("-f")
+        .arg("bochsrs.cfg")
         .output()
-        .expect("Failed to start qemu-system-x86_64. Is it installed in the PATH?");
+        .expect("Failed to start bochs. Is it installed in the PATH?");
 }
