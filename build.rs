@@ -27,12 +27,12 @@ async fn bios_main() {
         bios_boot_stage1_path.display()
     );
     println!(
-        "cargo:rustc-env=BIOS_BOOT_STAGE2_PATH={}",
-        bios_boot_stage2_path.display()
-    );
-    println!(
         "cargo:warning=BIOS_BOOT_STAGE1_PATH={}",
         bios_boot_stage1_path.display()
+    );
+    println!(
+        "cargo:rustc-env=BIOS_BOOT_STAGE2_PATH={}",
+        bios_boot_stage2_path.display()
     );
 }
 

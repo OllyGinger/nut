@@ -112,5 +112,6 @@ pub fn create_fat_filesystem_image(
     }
 
     fat::create_fat_filesystem(local_files, out_file.path()).unwrap();
+    println!("FAT FILE: {}", out_file.path().display());
     Ok(out_file)
 }

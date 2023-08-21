@@ -14,6 +14,7 @@ fatfs = { version = "0.3.4", default-features = false, features = [
 [workspace]
 members = [
     "x86_64",
+    "bootloader/bios",
     "bootloader/bios/stage0",
     "bootloader/bios/stage1",
     "bootloader/bios/stage2"
@@ -24,6 +25,8 @@ version = "0.1.0"
 
 [workspace.dependencies]
 x86_64 = {version = "0.1.0", path = "x86_64" }
+bootloader-x86_64-bios = {version = "0.1.0", path = "bootloader/bios"}
+
 
 [profile.dev]
 panic = "abort"
@@ -46,7 +49,7 @@ inherits = "release"
 opt-level = "s"
 codegen-units = 1
 debug = false
-overflow-checks = true
+overflow-checks = false
 
 [profile.stage2]
 inherits = "release"

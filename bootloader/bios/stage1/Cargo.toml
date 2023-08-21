@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 x86_64 = { workspace = true }
+bootloader-x86_64-bios = { workspace = true }
 
 [build]
 target = "i386-code16-stage0.json"
