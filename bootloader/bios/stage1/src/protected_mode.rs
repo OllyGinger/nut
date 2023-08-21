@@ -83,58 +83,49 @@ pub fn enter_unreal_mode() {
         asm!("mov eax, 0xb8f00");
         asm!("mov word ptr ds:[eax], bx");
     }
+}
 
-    /*// Preserve DS (Data segment) and SS (Stack segment) registers
-    let ds: u16;
-    let ss: u16;
+pub fn protected_mode_jump_to_stage2(entry_point: *const u8) {
     unsafe {
-        asm!("mov {0:x}, ds", out(reg) ds, options(nomem, nostack, preserves_flags));
-        asm!("mov {0:x}, ss", out(reg) ss, options(nomem, nostack, preserves_flags));
+        // Disable interrupts
         asm!("cli");
 
-        // Load protected mode gtd
-        PROTECTED_GTD.load();
-
-        // Set protected mode bit
+        // Enter protected mode
         let mut cr0: u32;
-        {
-            asm!(
-                "mov {:e}, cr0",  // Store cr0
-                out(reg) cr0,
-                options(nomem, nostack, preserves_flags)
-            );
-            let protected = cr0 | 0x1; // Set the protected mode bit
-            asm!(
-                "mov cr0, {:e}",
-                in(reg) protected,
-                options(nostack, preserves_flags)
-            );
-        }
+        asm!("mov {0:e}, cr0", out(reg) cr0);
+        let protected_flags = cr0 | 0x1;
+        asm!("mov cr0, {0:e}", in(reg) protected_flags);
+
+        // Set up the stack
+        asm!("and esp, 0xffffff00");
+        // Push arguments (disabled)
+        //asm!("push {info:e}", info = in(reg) info as u32);
+        // Push entry points
+        asm!("push {entry_point:e}", entry_point = in(reg)entry_point as u32);
+
+        // Long jump to 32bit sub below
+        asm!("ljmp $0x8, $2f", "2:", options(att_syntax));
 
         asm!(
-            // Load the new GTD into segment registers,
+            // 32bit code
+            ".code32",
+            // Reload segment regs
             "mov {0}, 0x10",
             "mov ds, {0}",
-            "mov ss, {0}", out(reg) _);
+            "mov es, {0}",
+            "mov ss, {0}",
 
-        // unset protected bit again
-        asm!("mov cr0, {:e}", in(reg) cr0, options(nostack, preserves_flags));
+            // Jump to second stage
+            "pop {1}",
+            "call {1}",
 
-        // Reset the segment registers
-        asm!("mov ds, {0:x}", in(reg) ds, options(nostack, preserves_flags));
-        asm!("mov ss, {0:x}", in(reg) ss, options(nostack, preserves_flags));
-
-        asm!(
-            // Re-enable interrupts
-            "sti",
-        )
+            // Trap loop if stage2 returns
+            "2:",
+            "jmp 2b",
+            out(reg)_,
+            out(reg)_
+        );
     }
-
-    // Restore DS and SS regs
-    unsafe {
-        asm!("mov ds, {0:x}", in(reg) ds, options(nostack, preserves_flags));
-        asm!("mov ss, {0:x}", in(reg) ss, options(nostack, preserves_flags));
-    }*/
 }
 
 #[no_mangle]

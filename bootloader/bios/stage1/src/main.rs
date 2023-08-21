@@ -4,9 +4,9 @@
 use core::{fmt::Write, slice};
 
 use crate::partition::{PartitionTableEntry, PartitionType};
-use bootloader_x86_64_bios::{disk_access, fail, print};
+use bootloader_x86_64_bios::{bochs_magic_breakpoint, disk_access, fail, print};
 use load_file::load_file;
-use protected_mode::enter_unreal_mode;
+use protected_mode::{enter_unreal_mode, protected_mode_jump_to_stage2};
 
 mod fat;
 mod load_file;
@@ -80,7 +80,7 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
         current_offset: 0,
     };
 
-    let disk_buffer = unsafe { &mut DISK_BUFFER };
+    let disk_buffer: &mut disk_access::AlignedArrayBuffer<16384> = unsafe { &mut DISK_BUFFER };
 
     let mut fs = fat::FileSystem::parse(disk.clone());
     let stage2_len = load_file("boot-stage-2", STAGE_2_DST, &mut fs, &mut disk, disk_buffer);
@@ -89,6 +89,9 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
         "\nStage 2 loaded at {STAGE_2_DST:#p}. Size: 0x{stage2_len:x}"
     )
     .unwrap();
+
+    unsafe { bochs_magic_breakpoint() };
+    protected_mode_jump_to_stage2(STAGE_2_DST);
 
     loop {
         fail::hlt()

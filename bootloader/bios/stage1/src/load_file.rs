@@ -1,12 +1,7 @@
 // Based on https://github.com/rust-osdev/bootloader/blob/main/bios/stage-2/src/main.rs
 
-use core::fmt::Write;
-
 use crate::{fat, protected_mode};
-use bootloader_x86_64_bios::{
-    disk_access::{self, Read, Seek},
-    print,
-};
+use bootloader_x86_64_bios::disk_access::{self, Read, Seek};
 
 fn try_load_file(
     file_name: &str,
