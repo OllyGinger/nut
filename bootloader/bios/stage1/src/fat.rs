@@ -238,13 +238,11 @@ impl<D: Read + Seek> FileSystem<D> {
         &'a mut self,
         file: &File,
     ) -> impl Iterator<Item = Result<Cluster, ()>> + 'a {
-        let foo = Traverser {
+        Traverser {
             current_entry: file.first_cluster,
             bpb: &self.bpb,
             disk: &mut self.disk,
-        };
-        writeln!(print::Writer, "yyyy ").unwrap();
-        foo
+        }
     }
 }
 

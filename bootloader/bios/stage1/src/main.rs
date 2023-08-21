@@ -62,7 +62,7 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     let fat_partition = partitions.get(third_stage_partition_idx + 1).unwrap();
     writeln!(
         print::Writer,
-        "Third stage partition idx: {third_stage_partition_idx} (LBA: 0x{0:x})\n",
+        "Stage 2 partition idx: {third_stage_partition_idx} (LBA: 0x{0:x})\n",
         fat_partition.logical_block_address
     )
     .unwrap();
@@ -74,7 +74,6 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     )
     .unwrap();
 
-    writeln!(print::Writer, "1").unwrap();
     let mut disk = disk_access::DiskAccess {
         disk_number,
         base_offset: u64::from(fat_partition.logical_block_address) * 512,
@@ -84,14 +83,12 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     let disk_buffer = unsafe { &mut DISK_BUFFER };
 
     let mut fs = fat::FileSystem::parse(disk.clone());
-    writeln!(print::Writer, "2 - {:?}", fs).unwrap();
     let stage2_len = load_file("boot-stage-2", STAGE_2_DST, &mut fs, &mut disk, disk_buffer);
     writeln!(
         print::Writer,
-        "Stage 2 loaded at {STAGE_2_DST:#p}. Size: 0x{stage2_len:x}"
+        "\nStage 2 loaded at {STAGE_2_DST:#p}. Size: 0x{stage2_len:x}"
     )
     .unwrap();
-    writeln!(print::Writer, "3").unwrap();
 
     loop {
         fail::hlt()

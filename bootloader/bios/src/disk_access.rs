@@ -58,13 +58,13 @@ impl Read for DiskAccess {
         let mut number_of_sectors = end_lba + 1 - start_lba;
         let mut target_addr = buf.as_ptr_range().start as u32;
 
-        writeln!(
-            print::Writer,
-            "---- START: 0x{:x} - END: 0x{:x}",
-            target_addr,
-            end_addr
-        )
-        .unwrap();
+        //writeln!(
+        //    print::Writer,
+        //    "---- START: 0x{:x} - END: 0x{:x}",
+        //    target_addr,
+        //    end_addr
+        //)
+        //.unwrap();
 
         loop {
             let sectors = u64::min(number_of_sectors, 32) as u16;
@@ -75,7 +75,10 @@ impl Read for DiskAccess {
                 (target_addr >> 4).try_into().unwrap(),
             );
 
-            writeln!(print::Writer, "DAP: {:?}", dap).unwrap();
+            // HACK: I honestly don't know why the following line is needed. If you remove it
+            // the screen stops updating in QEMU and Bochs...
+            write!(print::Writer, ".").unwrap();
+
             unsafe {
                 dap.read_disk(self.disk_number);
             }

@@ -20,32 +20,24 @@ fn try_load_file(
     let file = fs.find_file_in_root_dir(file_name, disk_buffer)?;
 
     let file_size = file.file_size().into();
-    //writeln!(print::Writer, "File {:?}", file).unwrap();
 
     let mut total_offset = 0;
     for cluster in fs.file_clusters(&file) {
-        writeln!(print::Writer, "xxxxx: ").unwrap();
-
         let cluster = cluster.unwrap();
         let cluster_start = cluster.start_offset;
         let cluster_end = cluster_start + u64::from(cluster.len_bytes);
-        writeln!(print::Writer, "Cluster: {cluster_start}").unwrap();
 
         let mut offset = 0;
         loop {
             let range_start = cluster_start + offset;
-            //writeln!(print::Writer, "range_start: {range_start}").unwrap();
             if range_start >= cluster_end {
-                //writeln!(print::Writer, "range break;").unwrap();
                 break;
             }
             let range_end = u64::min(
                 range_start + u64::try_from(disk_buffer_size).unwrap(),
                 cluster_end,
             );
-            //writeln!(print::Writer, "range_end: {range_start}").unwrap();
             let len = range_end - range_start;
-            //writeln!(print::Writer, "len: {range_start}").unwrap();
 
             disk.seek(disk_access::SeekFrom::Start(range_start));
             disk.read_exact_into(disk_buffer_size, disk_buffer);
@@ -61,8 +53,6 @@ fn try_load_file(
             total_offset += usize::try_from(len).unwrap();
         }
     }
-
-    writeln!(print::Writer, "End of file...").unwrap();
 
     Some(file_size)
 }
