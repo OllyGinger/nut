@@ -4,7 +4,7 @@
 use core::{fmt::Write, slice};
 
 use crate::partition::{PartitionTableEntry, PartitionType};
-use bootloader_x86_64_bios::{bochs_magic_breakpoint, disk_access, fail, print};
+use bootloader_x86_64_bios::{disk_access, fail, print, BiosFramebufferInfo, BiosInfo, Region};
 use load_file::load_file;
 use protected_mode::{enter_unreal_mode, protected_mode_jump_to_stage2};
 
@@ -12,6 +12,7 @@ mod fat;
 mod load_file;
 mod partition;
 mod protected_mode;
+mod vesa;
 
 /// We use this partition type to store the second bootloader stage;
 const BOOTLOADER_SECOND_STAGE_PARTITION_TYPE: u8 = 0x20;
@@ -90,8 +91,45 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     )
     .unwrap();
 
-    unsafe { bochs_magic_breakpoint() };
-    protected_mode_jump_to_stage2(STAGE_2_DST);
+    let max_width = 1280;
+    let max_height = 720;
+    let mut vesa_info = vesa::VesaInfo::query(disk_buffer).unwrap();
+    let vesa_mode = vesa_info
+        .get_best_mode(max_width, max_height)
+        .unwrap()
+        .unwrap();
+    writeln!(
+        print::Writer,
+        "VESA MODE: {}x{} {:x}",
+        vesa_mode.width,
+        vesa_mode.height,
+        vesa_mode.framebuffer_start
+    )
+    .unwrap();
+    vesa_mode.enable().unwrap();
+
+    let mut bios_info = BiosInfo {
+        framebuffer: BiosFramebufferInfo {
+            region: Region {
+                start: vesa_mode.framebuffer_start.into(),
+                len: u64::from(vesa_mode.height) * u64::from(vesa_mode.bytes_per_scanline),
+            },
+            width: vesa_mode.width,
+            height: vesa_mode.height,
+            bytes_per_pixel: vesa_mode.bytes_per_pixel,
+            stride: vesa_mode.bytes_per_scanline / u16::from(vesa_mode.bytes_per_pixel),
+            pixel_format: vesa_mode.pixel_format,
+        },
+        stage_4: Region { start: 0, len: 0 },
+        kernel: Region { start: 0, len: 0 },
+        ramdisk: Region { start: 0, len: 0 },
+        config_file: Region { start: 0, len: 0 },
+        last_used_addr: 0,
+        memory_map_addr: 0,
+        memory_map_len: 0,
+    };
+
+    protected_mode_jump_to_stage2(STAGE_2_DST, &mut bios_info);
 
     loop {
         fail::hlt()

@@ -1,3 +1,4 @@
+use bootloader_x86_64_bios::BiosInfo;
 use core::{arch::asm, mem::size_of};
 use x86_64::gdt::DescriptorFlags;
 
@@ -85,7 +86,7 @@ pub fn enter_unreal_mode() {
     }
 }
 
-pub fn protected_mode_jump_to_stage2(entry_point: *const u8) {
+pub fn protected_mode_jump_to_stage2(entry_point: *const u8, bios_info: &mut BiosInfo) {
     unsafe {
         // Disable interrupts
         asm!("cli");
@@ -98,8 +99,8 @@ pub fn protected_mode_jump_to_stage2(entry_point: *const u8) {
 
         // Set up the stack
         asm!("and esp, 0xffffff00");
-        // Push arguments (disabled)
-        //asm!("push {info:e}", info = in(reg) info as u32);
+        // Push argument
+        asm!("push {bios_info:e}", bios_info = in(reg) bios_info as *const _ as u32);
         // Push entry points
         asm!("push {entry_point:e}", entry_point = in(reg)entry_point as u32);
 

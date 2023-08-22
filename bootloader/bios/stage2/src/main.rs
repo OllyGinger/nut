@@ -1,12 +1,19 @@
 #![no_std]
 #![no_main]
 
-use bootloader_x86_64_bios::print;
+use crate::screen::Writer;
+use bootloader_x86_64_bios::BiosInfo;
+use core::fmt::Write as _;
+
+mod screen;
 
 #[no_mangle]
 #[link_section = ".start"]
-pub extern "C" fn _start() {
-    print::print_str("Starting Stage 2...\n");
+pub extern "C" fn _start(bios_info: &mut BiosInfo) {
+    screen::init(bios_info.framebuffer);
+
+    // Writer.clear_screen();
+    writeln!(Writer, "Third Stage\n\n{bios_info:x?})\n\n").unwrap();
 
     loop {
         unsafe { core::arch::asm!("hlt") };

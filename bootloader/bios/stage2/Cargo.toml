@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 x86_64 = { workspace = true }
 bootloader-x86_64-bios = { workspace = true }
+noto-sans-mono-bitmap = "0.1.5"
 
 [build]
 target = "i386-unknown-none.json"
