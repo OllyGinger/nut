@@ -71,7 +71,7 @@ impl ScreenWriter {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
             c => {
-                let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size14).unwrap();
+                let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 if self.x_pos + bitmap_char.width() > self.width() {
                     self.newline();
                 }
