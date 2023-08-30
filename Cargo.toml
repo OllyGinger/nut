@@ -17,7 +17,8 @@ members = [
     "bootloader/bios",
     "bootloader/bios/stage0",
     "bootloader/bios/stage1",
-    "bootloader/bios/stage2"
+    "bootloader/bios/stage2",
+    "bootloader/bios/stage3"
 ]
 
 [workspace.package]
@@ -52,6 +53,11 @@ debug = false
 overflow-checks = false
 
 [profile.stage2]
+inherits = "release"
+debug = true
+overflow-checks = true
+
+[profile.stage3]
 inherits = "release"
 debug = true
 overflow-checks = true

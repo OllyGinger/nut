@@ -1,5 +1,4 @@
 use core::arch::asm;
-use core::cell::UnsafeCell;
 
 use bootloader_x86_64_bios::racy_cell::RacyCell;
 

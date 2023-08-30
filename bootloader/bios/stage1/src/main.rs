@@ -19,6 +19,7 @@ const BOOTLOADER_SECOND_STAGE_PARTITION_TYPE: u8 = 0x20;
 
 // 1MB Location that stage 2 loader will be copied to
 const STAGE_2_DST: *mut u8 = 0x0010_0000 as *mut u8;
+const STAGE_3_DST: *mut u8 = 0x0013_0000 as *mut u8;
 
 static mut DISK_BUFFER: disk_access::AlignedArrayBuffer<0x4000> = disk_access::AlignedArrayBuffer {
     buffer: [0; 0x4000],
@@ -91,6 +92,13 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     )
     .unwrap();
 
+    let stage3_len = load_file("boot-stage-3", STAGE_3_DST, &mut fs, &mut disk, disk_buffer);
+    writeln!(
+        print::Writer,
+        "\nStage 3 loaded at {STAGE_3_DST:#p}. Size: 0x{stage3_len:x}"
+    )
+    .unwrap();
+
     let max_width = 1280;
     let max_height = 720;
     let mut vesa_info = vesa::VesaInfo::query(disk_buffer).unwrap();
@@ -143,6 +151,7 @@ use core::arch::asm;
 #[panic_handler]
 pub fn panic(info: &core::panic::PanicInfo) -> ! {
     writeln!(print::Writer, "PANIC!!!").unwrap();
+    writeln!(print::Writer, "{}", info).unwrap();
     loop {
         unsafe {
             asm!("hlt");

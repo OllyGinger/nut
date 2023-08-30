@@ -5,6 +5,7 @@ use crate::screen::Writer;
 use bootloader_x86_64_bios::BiosInfo;
 use core::fmt::Write as _;
 
+mod gdt;
 mod paging;
 mod screen;
 
@@ -17,6 +18,7 @@ pub extern "C" fn _start(bios_info: &mut BiosInfo) {
     writeln!(Writer, "Third Stage").unwrap();
 
     paging::init();
+    gdt::LONG_GTD.load();
 
     loop {
         unsafe { core::arch::asm!("hlt") };

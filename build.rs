@@ -11,10 +11,16 @@ fn main() {
 
 async fn bios_main() {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
-    let (bios_boot_stage0_path, bios_boot_stage1_path, bios_boot_stage2_path) = (
+    let (
+        bios_boot_stage0_path,
+        bios_boot_stage1_path,
+        bios_boot_stage2_path,
+        bios_boot_stage3_path,
+    ) = (
         build_bios_boot_stage0(&out_dir),
         build_bios_boot_stage1(&out_dir),
         build_bios_boot_stage2(&out_dir),
+        build_bios_boot_stage3(&out_dir),
     )
         .join()
         .await;
@@ -33,6 +39,10 @@ async fn bios_main() {
     println!(
         "cargo:rustc-env=BIOS_BOOT_STAGE2_PATH={}",
         bios_boot_stage2_path.display()
+    );
+    println!(
+        "cargo:rustc-env=BIOS_BOOT_STAGE3_PATH={}",
+        bios_boot_stage3_path.display()
     );
 }
 
@@ -158,6 +168,47 @@ async fn build_bios_boot_stage2(out_dir: &Path) -> PathBuf {
         path
     } else {
         panic!("failed to build bios stage2");
+    };
+    convert_elf_to_bin(elf_path).await
+}
+
+async fn build_bios_boot_stage3(out_dir: &Path) -> PathBuf {
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".into());
+    let mut cmd = Command::new(cargo);
+    cmd.arg("install").arg("bootloader-x86_64-bios-stage3");
+    let local_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("bootloader")
+        .join("bios")
+        .join("stage3");
+    if local_path.exists() {
+        // local build
+        cmd.arg("--path").arg(&local_path);
+        println!("cargo:rerun-if-changed={}", local_path.display());
+    } else {
+        cmd.arg("--version").arg(BOOTLOADER_VERSION);
+    }
+    cmd.arg("--locked");
+    cmd.arg("--target").arg("x86_64-unknown-nut.json");
+    cmd.arg("--profile").arg("stage3");
+    cmd.arg("-Zbuild-std=core")
+        .arg("-Zbuild-std-features=compiler-builtins-mem");
+    cmd.arg("--root").arg(out_dir);
+    cmd.env_remove("RUSTFLAGS");
+    cmd.env_remove("CARGO_ENCODED_RUSTFLAGS");
+    cmd.env_remove("RUSTC_WORKSPACE_WRAPPER"); // used by clippy
+    let status = cmd
+        .status()
+        .await
+        .expect("failed to run cargo install for bios stage3");
+    let elf_path = if status.success() {
+        let path = out_dir.join("bin").join("bootloader-x86_64-bios-stage3");
+        assert!(
+            path.exists(),
+            "bios stage3 executable does not exist after building"
+        );
+        path
+    } else {
+        panic!("failed to build bios stage3");
     };
     convert_elf_to_bin(elf_path).await
 }

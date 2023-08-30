@@ -18,8 +18,10 @@ pub fn main() {
         "boot-stage-2",
         FileDataSource::File(Path::new(env!("BIOS_BOOT_STAGE2_PATH")).to_path_buf()),
     );
-
-    println!("XXX: {}", env!("BIOS_BOOT_STAGE2_PATH"));
+    internal_files.insert(
+        "boot-stage-3",
+        FileDataSource::File(Path::new(env!("BIOS_BOOT_STAGE3_PATH")).to_path_buf()),
+    );
 
     // Create the FAT32 partition
     let fat_partition = disk::create_fat_filesystem_image(internal_files).unwrap();

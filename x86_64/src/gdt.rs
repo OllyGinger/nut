@@ -67,11 +67,30 @@ impl DescriptorFlags {
             | Self::GRANULARITY.bits(),
     );
 
-    // Kernel data segment
+    // 32-bit Kernel data segment
     #[allow(unused)]
     pub const KERNEL_DATA: Self = Self::from_bits_truncate(Self::COMMON_FLAGS.bits());
     // 32-bit kernel code segment
     #[allow(unused)]
     pub const KERNEL_CODE32: Self =
         Self::from_bits_truncate(Self::COMMON_FLAGS.bits() | Self::EXECUTABLE.bits());
+    // 64-bit kernel code segment
+    #[allow(unused)]
+    pub const KERNEL_CODE64: Self = Self::from_bits_truncate(
+        Self::USER_SEGMENT.bits()
+            | Self::PRESENT.bits()
+            | Self::WRITABLE.bits()
+            | Self::ACCESSED.bits()
+            | Self::EXECUTABLE.bits()
+            | Self::LONG_MODE.bits(),
+    );
+    // 64-bit kernel data segment
+    #[allow(unused)]
+    pub const KERNEL_DATA64: Self = Self::from_bits_truncate(
+        Self::USER_SEGMENT.bits()
+            | Self::PRESENT.bits()
+            | Self::WRITABLE.bits()
+            | Self::ACCESSED.bits()
+            | Self::LONG_MODE.bits(),
+    );
 }
