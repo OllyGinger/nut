@@ -10,6 +10,7 @@ use protected_mode::{enter_unreal_mode, protected_mode_jump_to_stage2};
 
 mod fat;
 mod load_file;
+mod memory_map;
 mod partition;
 mod protected_mode;
 mod vesa;
@@ -92,12 +93,19 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
     )
     .unwrap();
 
-    let stage3_len = load_file("boot-stage-3", STAGE_3_DST, &mut fs, &mut disk, disk_buffer);
+    let stage3_dst = {
+        let stage_3_end = STAGE_2_DST.wrapping_add(usize::try_from(stage2_len).unwrap());
+        assert!(STAGE_3_DST > stage_3_end);
+        STAGE_3_DST
+    };
+    let stage3_len = load_file("boot-stage-3", stage3_dst, &mut fs, &mut disk, disk_buffer);
     writeln!(
         print::Writer,
-        "\nStage 3 loaded at {STAGE_3_DST:#p}. Size: 0x{stage3_len:x}"
+        "\nStage 3 loaded at {stage3_dst:#p}. Size: 0x{stage3_len:x}"
     )
     .unwrap();
+
+    let memory_map = unsafe { memory_map::query_memory_map().unwrap() };
 
     let max_width = 1280;
     let max_height = 720;
@@ -128,13 +136,16 @@ pub extern "C" fn _start(disk_number: u16, partition_table_start: *const u8) -> 
             stride: vesa_mode.bytes_per_scanline / u16::from(vesa_mode.bytes_per_pixel),
             pixel_format: vesa_mode.pixel_format,
         },
-        stage_4: Region { start: 0, len: 0 },
+        stage_3: Region {
+            start: stage3_dst as u64,
+            len: stage3_len,
+        },
         kernel: Region { start: 0, len: 0 },
         ramdisk: Region { start: 0, len: 0 },
         config_file: Region { start: 0, len: 0 },
         last_used_addr: 0,
-        memory_map_addr: 0,
-        memory_map_len: 0,
+        memory_map_addr: memory_map.as_mut_ptr() as u32,
+        memory_map_len: memory_map.len().try_into().unwrap(),
     };
 
     protected_mode_jump_to_stage2(STAGE_2_DST, &mut bios_info);

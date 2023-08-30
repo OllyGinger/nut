@@ -1,9 +1,6 @@
-use bootloader_x86_64_bios::{
-    disk_access::{AlignedBuffer, Read, Seek, SeekFrom},
-    print,
-};
+use bootloader_x86_64_bios::disk_access::{AlignedBuffer, Read, Seek, SeekFrom};
 use core::char::DecodeUtf16Error;
-use core::{fmt::Write, slice};
+use core::fmt::Write;
 
 const DIRECTORY_ENTRY_BYTES: usize = 32;
 const UNUSED_ENTRY_PREFIX: u8 = 0xE5;
@@ -424,24 +421,12 @@ impl<'a> RawDirectoryEntry<'a> {
 
     pub fn eq_name(&self, name: &str) -> bool {
         match self {
-            RawDirectoryEntry::Normal(entry) => {
-                writeln!(
-                    bootloader_x86_64_bios::print::Writer,
-                    "{}",
-                    entry.short_filename_main
-                )
-                .unwrap();
-
-                entry
-                    .short_filename_main
-                    .chars()
-                    .chain(entry.short_filename_extension.chars())
-                    .eq(name.chars())
-            }
-            RawDirectoryEntry::LongName(entry) => {
-                //writeln!(bootloader_x86_64_bios::print::Writer, "{}", entry.name()).unwrap();
-                entry.name().eq(name.chars().map(Ok))
-            }
+            RawDirectoryEntry::Normal(entry) => entry
+                .short_filename_main
+                .chars()
+                .chain(entry.short_filename_extension.chars())
+                .eq(name.chars()),
+            RawDirectoryEntry::LongName(entry) => entry.name().eq(name.chars().map(Ok)),
         }
     }
 }

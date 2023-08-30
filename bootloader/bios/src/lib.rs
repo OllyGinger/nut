@@ -12,7 +12,7 @@ pub unsafe fn bochs_magic_breakpoint() {
 #[derive(Debug)]
 #[repr(C)]
 pub struct BiosInfo {
-    pub stage_4: Region,
+    pub stage_3: Region,
     pub kernel: Region,
     pub ramdisk: Region,
     pub config_file: Region,
@@ -59,4 +59,13 @@ impl PixelFormat {
             PixelFormat::Unknown { .. } => true,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
+pub struct E820MemoryRegion {
+    pub start_addr: u64,
+    pub len: u64,
+    pub region_type: u32,
+    pub acpi_extended_attributes: u32,
 }
