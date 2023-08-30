@@ -26,8 +26,9 @@ The bootloader is mutli-stage. The stages are;
 
 ## Useful links
 ### Reference
+* [Intel 64 Reference](https://cdrdv2.intel.com/v1/dl/getContent/671200)
 * [AMD x64 Reference](https://www.amd.com/system/files/TechDocs/24593.pdf)
-* 
+
 ### General
 * https://wiki.osdev.org/Expanded_Main_Page
 * https://os.phil-opp.com
