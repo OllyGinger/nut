@@ -22,7 +22,7 @@ pub extern "C" fn _start(bios_info: &mut BiosInfo) {
     gdt::LONG_GTD.load();
 
     writeln!(Writer, "Paging init done, jumping to stage 3").unwrap();
-    enter_long_mode_and_jump_to_stage_3(bios_info);
+    //enter_long_mode_and_jump_to_stage_3(bios_info);
 
     loop {
         unsafe { core::arch::asm!("hlt") };

@@ -1,6 +1,5 @@
 use bootloader_x86_64_bios::disk_access::{AlignedBuffer, Read, Seek, SeekFrom};
 use core::char::DecodeUtf16Error;
-use core::fmt::Write;
 
 const DIRECTORY_ENTRY_BYTES: usize = 32;
 const UNUSED_ENTRY_PREFIX: u8 = 0xE5;
