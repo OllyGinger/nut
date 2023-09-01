@@ -1,11 +1,12 @@
 [package]
-name = "bootloader-x86_64-bios-stage0"
+name = "kernel"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bootloader_api = "0.11.4"
 
 [build]
-target = "i386-code16-stage0.json"
+target = "x86_64-unknown-none"

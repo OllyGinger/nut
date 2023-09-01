@@ -1,5 +1,7 @@
 {
     "rust-analyzer.linkedProjects": [
-        ".\\x86_64\\Cargo.toml"
-    ]
+        ".\\x86_64\\Cargo.toml",
+        ".\\kernel\\Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

@@ -1,13 +1,15 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Example remote debugging
+    // See: https://stackoverflow.com/questions/68888706/remote-debug-of-rust-program-in-visual-studio-code
+    //
+    // Specific examples of debugging:
+    // https://github.com/phil-opp/blog_os/issues/1206#issuecomment-1563423248
     "version": "0.2.0",
     "configurations": [
         {
             "type": "lldb",
-            "name": "Debug executable 'nut'",
             "request": "custom",
+            "name": "Debug executable 'nut'",
             "targetCreateCommands": [
                 "target create \"target\\disk.img\""
             ],
